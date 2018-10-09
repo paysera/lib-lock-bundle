@@ -1,0 +1,15 @@
+framework:
+    secret: test
+    session:
+        storage_id: session.storage.mock_file
+
+snc_redis:
+    clients:
+        default:
+            type: predis
+            alias: default
+            dsn: redis://localhost
+
+paysera_lock:
+    ttl: 10
+    redis_client: 'snc_redis.default'
