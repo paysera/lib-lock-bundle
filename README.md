@@ -1,4 +1,4 @@
-# lib-lock-bundle
+# lib-lock-bundle [![Build Status](https://travis-ci.org/paysera/lib-lock-bundle.svg?branch=master)](https://travis-ci.org/paysera/lib-lock-bundle)
 
 Provides quick integration with `symfony/lock`
 
