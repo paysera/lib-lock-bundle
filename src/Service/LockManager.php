@@ -4,7 +4,7 @@ namespace Paysera\Bundle\LockBundle\Service;
 
 use Symfony\Component\Lock\Exception\LockAcquiringException;
 use Symfony\Component\Lock\Factory;
-use Symfony\Component\Lock\Lock;
+use Symfony\Component\Lock\LockInterface;
 
 class LockManager
 {
@@ -19,12 +19,12 @@ class LockManager
         $this->ttl = $ttl;
     }
 
-    public function createLock(string $resource): Lock
+    public function createLock(string $resource): LockInterface
     {
         return $this->lockFactory->createLock($resource, $this->ttl);
     }
 
-    public function acquire(Lock $lock): bool
+    public function acquire(LockInterface $lock): bool
     {
         foreach (range(1, $this->ttl) as $waited) {
             if ($lock->acquire()) {
@@ -41,7 +41,7 @@ class LockManager
         throw new LockAcquiringException('Failed to acquire lock');
     }
 
-    public function createAcquired(string $resource): Lock
+    public function createAcquired(string $resource): LockInterface
     {
         $lock = $this->createLock($resource);
         $this->acquire($lock);
@@ -49,7 +49,7 @@ class LockManager
         return $lock;
     }
 
-    public function release(Lock $lock)
+    public function release(LockInterface $lock)
     {
         $lock->release();
     }
