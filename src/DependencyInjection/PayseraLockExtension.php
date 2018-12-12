@@ -26,6 +26,6 @@ class PayseraLockExtension extends Extension
     private function configureLockStore(ContainerBuilder $container, array $config)
     {
         $storeDefinition = $container->getDefinition('paysera_lock.lock_store');
-        $storeDefinition->setArgument(0, new Reference($config['redis_client']));
+        $storeDefinition->replaceArgument(0, new Reference($config['redis_client']));
     }
 }
