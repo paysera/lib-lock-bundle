@@ -3,8 +3,24 @@
 Provides quick integration with `symfony/lock`
 
 ### Installation
+- Install package
 ```bash
 composer require paysera/lib-lock-bundle
+```
+- Enable bundle
+```php
+class AppKernel extends Kernel
+{
+    public function registerBundles()
+    {
+        $bundles = [
+            // ...
+            new Paysera\Bundle\LockBundle\PayseraLockBundle(),
+        ];
+
+        // ...
+    }
+}
 ```
 
 ### Configuration
@@ -30,13 +46,13 @@ paysera_lock:
 $lock = $this->lockManager->createLock($identifier);
 try {
     $this->lockManager->acquire($lock);
+    
+    // do something after aquiring lock
 } catch (LockAcquiringException $exception) {
     throw new Exception('...');
+} finally {
+    $lock->release();
 }
-
-// do something when got lock
-
-$lock->release();
 ```
 OR
 ```php
@@ -47,5 +63,4 @@ try {
 }
 
 // do rest
-
 ```
