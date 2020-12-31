@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_type=1);
+
 namespace Paysera\Bundle\LockBundle\Service;
 
 use Symfony\Component\Lock\Exception\LockAcquiringException;
@@ -21,7 +23,7 @@ class LockManager
 
     public function createLock(string $resource): LockInterface
     {
-        return $this->lockFactory->createLock($resource, $this->ttl);
+        return $this->lockFactory->createLock($resource, null);
     }
 
     public function acquire(LockInterface $lock): bool
