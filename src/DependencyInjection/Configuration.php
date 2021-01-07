@@ -9,8 +9,11 @@ class Configuration implements ConfigurationInterface
 {
     public function getConfigTreeBuilder()
     {
-        $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('paysera_lock');
+        $treeBuilder = new TreeBuilder('paysera_lock');
+        $rootNode = method_exists($treeBuilder, 'getRootNode')
+            ? $treeBuilder->getRootNode()
+            : $treeBuilder->root('paysera_lock')
+        ;
 
         $rootNode
             ->children()
