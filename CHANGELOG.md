@@ -5,8 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## 1.0.2
-### Fixed
-- All services have been made public to make it compatible with Symfony 4.x
+### Added
+- Added support for Symfony 4.x
 
 ## 1.0.1
 ### Fixed
