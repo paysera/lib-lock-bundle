@@ -11,5 +11,5 @@ snc_redis:
             dsn: redis://localhost
 
 paysera_lock:
-    ttl: 10
+    ttw: 10
     redis_client: 'snc_redis.default'

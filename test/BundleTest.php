@@ -34,8 +34,11 @@ class BundleTest extends TestCase
 
     public function testLockManagerConfiguration()
     {
+        $ttw = $this->container->getParameter('paysera_lock.ttw');
+        $this->assertEquals(10, $ttw);
+
         $ttl = $this->container->getParameter('paysera_lock.ttl');
-        $this->assertEquals(10, $ttl);
+        $this->assertNull($ttl);
 
         $lockManager = $this->container->get('paysera_lock.lock_manager');
         $this->assertInstanceOf(LockManager::class, $lockManager);

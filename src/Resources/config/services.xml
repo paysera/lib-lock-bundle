@@ -10,13 +10,14 @@
         </service>
 
         <service id="paysera_lock.lock_factory"
-                 class="Symfony\Component\Lock\Factory">
+                 class="Symfony\Component\Lock\LockFactory">
             <argument type="service" id="paysera_lock.lock_store"/>
         </service>
 
         <service id="paysera_lock.lock_manager"
                  class="Paysera\Bundle\LockBundle\Service\LockManager">
             <argument type="service" id="paysera_lock.lock_factory"/>
+            <argument>%paysera_lock.ttw%</argument>
             <argument>%paysera_lock.ttl%</argument>
         </service>
     </services>
