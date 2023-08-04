@@ -10,7 +10,7 @@
         </service>
 
         <service id="paysera_lock.lock_factory"
-                 class="Symfony\Component\Lock\LockFactory">
+                 class="Symfony\Component\Lock\Factory">
             <argument type="service" id="paysera_lock.lock_store"/>
         </service>
 

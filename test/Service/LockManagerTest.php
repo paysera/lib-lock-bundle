@@ -8,7 +8,7 @@ use Paysera\Bundle\LockBundle\Service\LockManager;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Lock\Exception\LockAcquiringException;
-use Symfony\Component\Lock\LockFactory;
+use Symfony\Component\Lock\Factory;
 use Symfony\Component\Lock\LockInterface;
 
 class LockManagerTest extends TestCase
@@ -19,13 +19,13 @@ class LockManagerTest extends TestCase
     private $lockManager;
 
     /**
-     * @var MockObject|LockFactory
+     * @var MockObject|Factory
      */
     private $lockFactory;
 
     public function setUp()
     {
-        $this->lockFactory = $this->createMock(LockFactory::class);
+        $this->lockFactory = $this->createMock(Factory::class);
         $this->lockManager = new LockManager(
             $this->lockFactory,
             2,

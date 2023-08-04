@@ -6,7 +6,6 @@ namespace Paysera\Bundle\LockBundle\Service;
 
 use Symfony\Component\Lock\Exception\LockAcquiringException;
 use Symfony\Component\Lock\Factory;
-use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Lock\LockInterface;
 
 class LockManager
@@ -16,7 +15,7 @@ class LockManager
     private $ttl;
 
     public function __construct(
-        LockFactory $lockFactory,
+        Factory $lockFactory,
         int $ttw,
         int $ttl = null
     ) {
