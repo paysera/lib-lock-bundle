@@ -17,7 +17,8 @@ class Configuration implements ConfigurationInterface
 
         $rootNode
             ->children()
-                ->scalarNode('ttl')->defaultValue(5)->end()
+                ->scalarNode('ttw')->defaultValue(5)->end()
+                ->scalarNode('ttl')->defaultNull()->end()
                 ->scalarNode('redis_client')->isRequired()->cannotBeEmpty()->end()
             ->end()
         ;

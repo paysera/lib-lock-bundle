@@ -15,7 +15,8 @@ class PayseraLockExtension extends Extension
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
 
-        $container->setParameter('paysera_lock.ttl', (int) $config['ttl']);
+        $container->setParameter('paysera_lock.ttw', $config['ttw']);
+        $container->setParameter('paysera_lock.ttl', $config['ttl']);
 
         $loader = new Loader\XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.xml');
