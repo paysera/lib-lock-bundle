@@ -1,0 +1,65 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - master
+      - symfony-5-support
+  pull_request:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ${{ matrix.operating-system }}
+
+    strategy:
+      matrix:
+        operating-system:
+          - "ubuntu-latest"
+        php:
+          - "7.1"
+          - "7.2"
+          - "7.3"
+          - "7.4"
+          - "8.0"
+          - "8.1"
+          - "8.2"
+        dependency:
+          - "highest"
+          - "lowest"
+
+    name: PHP ${{ matrix.php }} with ${{ matrix.dependency }} dependencies tests on ${{ matrix.operating-system }}
+
+    steps:
+      - name: Setup PHP version ${{ matrix.php }} on ${{ matrix.operating-system }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          coverage: xdebug
+
+      - name: Check PHP version
+        run: php -v
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        uses: ramsey/composer-install@v2
+        with:
+          dependency-versions: ${{ matrix.dependency }}
+
+      - name: Cache Composer packages
+        id: composer-cache
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ matrix.php }}-${{ matrix.dependency }}-${{ hashFiles('**/composer.json') }}
+          restore-keys: |
+            ${{ runner.os }}-php-${{ matrix.php }}-${{ matrix.dependency }}-${{ hashFiles('**/composer.json') }}
+
+      - name: Run PHPUnit tests
+        run: php bin/phpunit
