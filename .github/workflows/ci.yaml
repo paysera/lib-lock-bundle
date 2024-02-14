@@ -38,10 +38,6 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
-          coverage: xdebug
-
-      - name: Check PHP version
-        run: php -v
 
       - name: Checkout repository
         uses: actions/checkout@v4
