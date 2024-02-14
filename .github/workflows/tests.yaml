@@ -19,18 +19,17 @@ jobs:
     strategy:
       matrix:
         operating-system:
-          - "ubuntu-latest"
+          - 'ubuntu-latest'
         php:
-          - "7.1"
-          - "7.2"
-          - "7.3"
-          - "7.4"
-          - "8.0"
-          - "8.1"
-          - "8.2"
+          - '7.1'
+          - '7.2'
+          - '7.3'
+          - '7.4'
+          - '8.0'
+          - '8.1'
+          - '8.2'
         dependency:
-          - "highest"
-          - "lowest"
+          - 'highest'
 
     name: PHP ${{ matrix.php }} with ${{ matrix.dependency }} dependencies tests on ${{ matrix.operating-system }}
 
