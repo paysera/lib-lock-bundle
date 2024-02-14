@@ -2,3 +2,4 @@
 /bin/
 /var/
 composer.lock
+/.phpunit.result.cache

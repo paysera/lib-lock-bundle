@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Paysera\Bundle\LockBundle\Service;
 
 use Symfony\Component\Lock\Exception\LockAcquiringException;
-use Symfony\Component\Lock\Factory;
+use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Lock\LockInterface;
 
 class LockManager
@@ -14,7 +14,7 @@ class LockManager
     private $ttl;
 
     public function __construct(
-        Factory $lockFactory,
+        LockFactory $lockFactory,
         int $ttl
     ) {
         $this->lockFactory = $lockFactory;
@@ -51,7 +51,7 @@ class LockManager
         return $lock;
     }
 
-    public function release(LockInterface $lock)
+    public function release(LockInterface $lock): void
     {
         $lock->release();
     }
