@@ -61,5 +61,5 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-php-${{ matrix.php }}-${{ matrix.dependency }}-${{ hashFiles('**/composer.json') }}
 
-      - name: Run PHPUnit tests
-        run: php bin/phpunit
+      - name: Run all tests
+        run: composer test

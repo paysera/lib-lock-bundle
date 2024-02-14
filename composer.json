@@ -32,5 +32,15 @@
     },
     "config": {
         "bin-dir": "bin"
+    },
+    "scripts": {
+        "test": [
+            "@test:phpunit"
+        ],
+        "test:phpunit": "bin/phpunit"
+    },
+    "scripts-descriptions": {
+        "test": "Runs all tests",
+        "test:phpunit": "Runs PHPUnit tests"
     }
 }
