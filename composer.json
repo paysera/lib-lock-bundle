@@ -16,7 +16,7 @@
     "require": {
         "php": ">=7.1",
         "symfony/lock": "^v3.4 || ^4.4 || ^5.4",
-        "symfony/config": "^3.0 || ^4.0",
+        "symfony/config": "^3.0 || ^4.0 || ^5.0",
         "symfony/dependency-injection": "^3.0 || ^4.0 || ^5.0",
         "symfony/http-kernel": "^3.0 || ^4.0 || ^5.0",
         "symfony/yaml": "^4.0 || ^5.0 || ^6.0 || ^7.0",
