@@ -8,13 +8,12 @@ use Paysera\Bundle\LockBundle\Service\LockManager;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Symfony\Component\Lock\Exception\LockAcquiringException;
+use Symfony\Component\Lock\Key;
 use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Lock\LockInterface;
 use Symfony\Component\Lock\PersistingStoreInterface;
 use Symfony\Component\Lock\Store\FlockStore;
 use Symfony\Component\Lock\StoreInterface;
-
-require_once __DIR__ . '/sleep.php';
 
 class LockManagerTest extends TestCase
 {
@@ -23,30 +22,44 @@ class LockManagerTest extends TestCase
      */
     public static $sleeps = [];
 
+    public static function setUpBeforeClass(): void
+    {
+        // before LockManager first calls sleep(): PHP binds the call to whichever function it finds first
+        require_once __DIR__ . '/sleep.php';
+    }
+
     protected function setUp(): void
     {
         self::$sleeps = [];
     }
 
-    public function testCreateLockReturnsALockThatIsNotAcquiredAndHasNoTtl(): void
+    public function testCreateLockReturnsALockOnTheResourceThatIsNotAcquiredAndHasNoTtl(): void
     {
         // symfony/lock 4.4.0 types the factory's store as StoreInterface, which 5.0 removed
         $storeInterface = interface_exists(StoreInterface::class) ? StoreInterface::class : PersistingStoreInterface::class;
         $store = $this->createMock($storeInterface);
-        $store->expects($this->once())->method('save');
+        $store->expects($this->once())
+            ->method('save')
+            ->with($this->callback(function (Key $key): bool {
+                return (string) $key === 'invoice-42';
+            }))
+        ;
         $store->expects($this->never())->method('putOffExpiration');
+        // the lock's destructor asks; symfony/lock 4.x declares no return type, so the double must answer
         $store->method('exists')->willReturn(false);
 
-        $lock = (new LockManager(new LockFactory($store), 5))->createLock('lock-manager-test-create');
+        $lock = (new LockManager(new LockFactory($store), 5))->createLock('invoice-42');
 
-        $this->assertFalse($lock->isAcquired());
-        $this->assertTrue($lock->acquire(), 'a lock without a TTL is saved and never has its expiry extended');
+        $this->assertTrue($lock->acquire(), 'saved once, on acquire, and never given an expiry');
     }
 
     public function testAcquireReturnsTrueWhenTheFirstAttemptSucceeds(): void
     {
         $lock = $this->createMock(LockInterface::class);
-        $lock->expects($this->once())->method('acquire')->willReturn(true);
+        $lock->expects($this->once())
+            ->method('acquire')
+            ->willReturn(true)
+        ;
 
         $this->assertTrue((new LockManager($this->createMock(LockFactory::class), 5))->acquire($lock));
         $this->assertSame([], self::$sleeps);
@@ -55,7 +68,10 @@ class LockManagerTest extends TestCase
     public function testAcquireTriesAgainEverySecondUntilTheLockIsFree(): void
     {
         $lock = $this->createMock(LockInterface::class);
-        $lock->expects($this->exactly(3))->method('acquire')->willReturnOnConsecutiveCalls(false, false, true);
+        $lock->expects($this->exactly(3))
+            ->method('acquire')
+            ->willReturnOnConsecutiveCalls(false, false, true)
+        ;
 
         $this->assertTrue((new LockManager($this->createMock(LockFactory::class), 5))->acquire($lock));
         $this->assertSame([1, 1], self::$sleeps);
@@ -63,6 +79,8 @@ class LockManagerTest extends TestCase
 
     /**
      * @dataProvider ttlDataProvider
+     *
+     * @param int[] $expectedSleeps
      */
     public function testAcquireGivesUpAfterTtlAttemptsWithoutWaitingAfterTheLast(
         int $ttl,
@@ -70,7 +88,10 @@ class LockManagerTest extends TestCase
         array $expectedSleeps
     ): void {
         $lock = $this->createMock(LockInterface::class);
-        $lock->expects($this->exactly($expectedAttempts))->method('acquire')->willReturn(false);
+        $lock->expects($this->exactly($expectedAttempts))
+            ->method('acquire')
+            ->willReturn(false)
+        ;
 
         $this->expectException(LockAcquiringException::class);
         $this->expectExceptionMessage('Failed to acquire lock, wait time expired');
@@ -97,7 +118,10 @@ class LockManagerTest extends TestCase
     public function testAcquireDoesNotRetryWhenTheStoreFails(): void
     {
         $lock = $this->createMock(LockInterface::class);
-        $lock->expects($this->once())->method('acquire')->willThrowException(new RuntimeException('store is down'));
+        $lock->expects($this->once())
+            ->method('acquire')
+            ->willThrowException(new RuntimeException('store is down'))
+        ;
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('store is down');
@@ -109,12 +133,14 @@ class LockManagerTest extends TestCase
         $factory = new LockFactory(new FlockStore());
         $lockManager = new LockManager($factory, 5);
         $noWait = new LockManager($factory, 1);
+        // FlockStore locks files in the shared temp directory: a name per run keeps parallel runs apart
+        $resource = uniqid('lock-manager-test-', true);
 
-        $lock = $lockManager->createAcquired('lock-manager-test-acquired');
+        $lock = $lockManager->createAcquired($resource);
         $this->assertTrue($lock->isAcquired());
 
         try {
-            $noWait->createAcquired('lock-manager-test-acquired');
+            $noWait->createAcquired($resource);
             $this->fail('a second lock on the same resource was acquired');
         } catch (LockAcquiringException $exception) {
             $this->assertSame('Failed to acquire lock, wait time expired', $exception->getMessage());
@@ -123,7 +149,7 @@ class LockManagerTest extends TestCase
         $lockManager->release($lock);
         $this->assertFalse($lock->isAcquired());
 
-        $again = $noWait->createAcquired('lock-manager-test-acquired');
+        $again = $noWait->createAcquired($resource);
         $this->assertTrue($again->isAcquired());
         $again->release();
     }

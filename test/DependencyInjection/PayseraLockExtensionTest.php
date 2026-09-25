@@ -43,7 +43,8 @@ class PayseraLockExtensionTest extends TestCase
         $store = $this->load(['redis_client' => 'app.redis'])->getDefinition('paysera_lock.lock_store');
 
         $this->assertSame(RedisStore::class, $store->getClass());
-        $this->assertEquals([new Reference('app.redis')], $store->getArguments());
+        $this->assertCount(1, $store->getArguments());
+        $this->assertReferenceTo('app.redis', $store->getArgument(0));
     }
 
     public function testTheFactoryUsesTheStore(): void
@@ -51,7 +52,8 @@ class PayseraLockExtensionTest extends TestCase
         $factory = $this->load(['redis_client' => 'app.redis'])->getDefinition('paysera_lock.lock_factory');
 
         $this->assertSame(LockFactory::class, $factory->getClass());
-        $this->assertEquals([new Reference('paysera_lock.lock_store')], $factory->getArguments());
+        $this->assertCount(1, $factory->getArguments());
+        $this->assertReferenceTo('paysera_lock.lock_store', $factory->getArgument(0));
     }
 
     public function testTheLockManagerUsesTheFactoryAndTheTtl(): void
@@ -59,10 +61,9 @@ class PayseraLockExtensionTest extends TestCase
         $lockManager = $this->load(['redis_client' => 'app.redis'])->getDefinition('paysera_lock.lock_manager');
 
         $this->assertSame(LockManager::class, $lockManager->getClass());
-        $this->assertEquals(
-            [new Reference('paysera_lock.lock_factory'), '%paysera_lock.ttl%'],
-            $lockManager->getArguments()
-        );
+        $this->assertCount(2, $lockManager->getArguments());
+        $this->assertReferenceTo('paysera_lock.lock_factory', $lockManager->getArgument(0));
+        $this->assertSame('%paysera_lock.ttl%', $lockManager->getArgument(1));
     }
 
     /**
@@ -86,6 +87,15 @@ class PayseraLockExtensionTest extends TestCase
             'missing' => [['ttl' => 5]],
             'empty' => [['redis_client' => '']],
         ];
+    }
+
+    /**
+     * @param mixed $argument
+     */
+    private function assertReferenceTo(string $serviceId, $argument): void
+    {
+        $this->assertInstanceOf(Reference::class, $argument, 'a service reference, not the id as a string');
+        $this->assertSame($serviceId, (string) $argument);
     }
 
     /**
