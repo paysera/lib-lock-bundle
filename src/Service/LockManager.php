@@ -26,6 +26,9 @@ class LockManager
         return $this->lockFactory->createLock($resource, null);
     }
 
+    /**
+     * @throws LockAcquiringException when the lock is still held after ttl attempts one second apart
+     */
     public function acquire(LockInterface $lock): bool
     {
         foreach (range(1, $this->ttl) as $waited) {
@@ -44,6 +47,9 @@ class LockManager
         throw new LockAcquiringException('Failed to acquire lock'); // @codeCoverageIgnore
     }
 
+    /**
+     * @throws LockAcquiringException when the lock is still held after ttl attempts one second apart
+     */
     public function createAcquired(string $resource): LockInterface
     {
         $lock = $this->createLock($resource);
