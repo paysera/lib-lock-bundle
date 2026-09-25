@@ -27,6 +27,8 @@ jobs:
           - '8.0'
           - '8.1'
           - '8.2'
+          - '8.3'
+          - '8.4'
         dependency:
           - 'highest'
 
@@ -36,10 +38,10 @@ jobs:
       - name: Setup PHP version ${{ matrix.php }} on ${{ matrix.operating-system }}
         uses: shivammathur/setup-php@v2
         with:
-          php-version: ${{ matrix.php-versions }}
+          php-version: ${{ matrix.php }}
 
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install dependencies
         uses: ramsey/composer-install@v2
