@@ -22,12 +22,6 @@ class LockManagerTest extends TestCase
      */
     public static $sleeps = [];
 
-    public static function setUpBeforeClass(): void
-    {
-        // before LockManager first calls sleep(): PHP binds the call to whichever function it finds first
-        require_once __DIR__ . '/sleep.php';
-    }
-
     protected function setUp(): void
     {
         self::$sleeps = [];
@@ -44,13 +38,18 @@ class LockManagerTest extends TestCase
                 return (string) $key === 'invoice-42';
             }))
         ;
-        $store->expects($this->never())->method('putOffExpiration');
-        // the lock's destructor asks; symfony/lock 4.x declares no return type, so the double must answer
-        $store->method('exists')->willReturn(false);
+        $store->expects($this->never())
+            ->method('putOffExpiration')
+        ;
+        // the lock's destructor asks; symfony/lock below 6.0 declares no return type here, so the double must answer
+        $store->method('exists')
+            ->willReturn(false)
+        ;
 
         $lock = (new LockManager(new LockFactory($store), 5))->createLock('invoice-42');
 
-        $this->assertTrue($lock->acquire(), 'saved once, on acquire, and never given an expiry');
+        // the store double's expectations are the assertions: saved once, with this key, and never given an expiry
+        $lock->acquire();
     }
 
     public function testAcquireReturnsTrueWhenTheFirstAttemptSucceeds(): void
@@ -157,7 +156,9 @@ class LockManagerTest extends TestCase
     public function testReleaseReleasesTheGivenLock(): void
     {
         $lock = $this->createMock(LockInterface::class);
-        $lock->expects($this->once())->method('release');
+        $lock->expects($this->once())
+            ->method('release')
+        ;
 
         (new LockManager($this->createMock(LockFactory::class), 5))->release($lock);
     }

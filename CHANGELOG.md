@@ -7,8 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## 2.2.0
 ### Added
 - Support for Symfony 7.4
-### Changed
-- `symfony/lock` 3.4 is no longer allowed: the bundle uses `LockFactory`, which 3.4 does not have
+### Removed
+- Support for `symfony/lock` 3.4: the bundle uses `LockFactory`, which 3.4 does not have
 
 ## 2.1.0
 ### Added

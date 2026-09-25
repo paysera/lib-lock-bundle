@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Paysera\Bundle\LockBundle\Service;
 
 use Symfony\Component\Lock\Exception\LockAcquiringException;
+use Symfony\Component\Lock\Exception\LockReleasingException;
 use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Lock\LockInterface;
 
@@ -27,7 +28,8 @@ class LockManager
     }
 
     /**
-     * @throws LockAcquiringException when the lock is still held after ttl attempts one second apart
+     * @throws LockAcquiringException when the lock is still held after the last attempt (ttl attempts one second apart,
+     *                                at least one), or at once when the store fails
      */
     public function acquire(LockInterface $lock): bool
     {
@@ -48,7 +50,8 @@ class LockManager
     }
 
     /**
-     * @throws LockAcquiringException when the lock is still held after ttl attempts one second apart
+     * @throws LockAcquiringException when the lock is still held after the last attempt (ttl attempts one second apart,
+     *                                at least one), or at once when the store fails
      */
     public function createAcquired(string $resource): LockInterface
     {
@@ -58,6 +61,9 @@ class LockManager
         return $lock;
     }
 
+    /**
+     * @throws LockReleasingException when the store fails to release the lock
+     */
     public function release(LockInterface $lock): void
     {
         $lock->release();
