@@ -40,7 +40,8 @@ class LockManager
             sleep(1);
         }
 
-        throw new LockAcquiringException('Failed to acquire lock');
+        // Unreachable: an exhausted loop has already thrown above.
+        throw new LockAcquiringException('Failed to acquire lock'); // @codeCoverageIgnore
     }
 
     public function createAcquired(string $resource): LockInterface
