@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Paysera\Bundle\LockBundle\Test;
 
 use Paysera\Bundle\LockBundle\PayseraLockBundle;
-use Snc\RedisBundle\SncRedisBundle;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -20,7 +19,6 @@ class TestKernel extends Kernel implements CompilerPassInterface
 
         if (in_array($this->getEnvironment(), ['test'])) {
             $bundles[] = new FrameworkBundle();
-            $bundles[] = new SncRedisBundle();
             $bundles[] = new PayseraLockBundle();
         }
 
