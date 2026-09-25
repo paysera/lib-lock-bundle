@@ -10,7 +10,9 @@ use RuntimeException;
 use Symfony\Component\Lock\Exception\LockAcquiringException;
 use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Lock\LockInterface;
+use Symfony\Component\Lock\PersistingStoreInterface;
 use Symfony\Component\Lock\Store\FlockStore;
+use Symfony\Component\Lock\StoreInterface;
 
 require_once __DIR__ . '/sleep.php';
 
@@ -26,16 +28,19 @@ class LockManagerTest extends TestCase
         self::$sleeps = [];
     }
 
-    public function testCreateLockReturnsALockThatIsNotAcquiredAndNeverExpires(): void
+    public function testCreateLockReturnsALockThatIsNotAcquiredAndHasNoTtl(): void
     {
-        $lockManager = new LockManager(new LockFactory(new FlockStore()), 5);
+        // symfony/lock 4.4.0 types the factory's store as StoreInterface, which 5.0 removed
+        $storeInterface = interface_exists(StoreInterface::class) ? StoreInterface::class : PersistingStoreInterface::class;
+        $store = $this->createMock($storeInterface);
+        $store->expects($this->once())->method('save');
+        $store->expects($this->never())->method('putOffExpiration');
+        $store->method('exists')->willReturn(false);
 
-        $lock = $lockManager->createLock('lock-manager-test-create');
+        $lock = (new LockManager(new LockFactory($store), 5))->createLock('lock-manager-test-create');
 
         $this->assertFalse($lock->isAcquired());
-        $this->assertTrue($lock->acquire());
-        $this->assertNull($lock->getRemainingLifetime(), 'the lock is created without a TTL');
-        $lock->release();
+        $this->assertTrue($lock->acquire(), 'a lock without a TTL is saved and never has its expiry extended');
     }
 
     public function testAcquireReturnsTrueWhenTheFirstAttemptSucceeds(): void
