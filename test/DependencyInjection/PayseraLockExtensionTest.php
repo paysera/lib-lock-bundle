@@ -24,46 +24,66 @@ class PayseraLockExtensionTest extends TestCase
         $this->assertSame('paysera_lock', $extension->getAlias());
     }
 
-    public function testTtlDefaultsToFiveSeconds(): void
+    /**
+     * @dataProvider ttlDataProvider
+     *
+     * @param array<string, mixed> $config
+     */
+    public function testTtlParameter(array $config, int $expectedTtl): void
     {
-        $container = $this->load(['redis_client' => 'app.redis']);
-
-        $this->assertSame(5, $container->getParameter('paysera_lock.ttl'));
+        $this->assertSame($expectedTtl, $this->load($config)->getParameter('paysera_lock.ttl'));
     }
 
-    public function testTtlIsReadAsAnInteger(): void
+    /**
+     * @return array<string, array{array<string, mixed>, int}>
+     */
+    public static function ttlDataProvider(): array
     {
-        $container = $this->load(['ttl' => '10', 'redis_client' => 'app.redis']);
-
-        $this->assertSame(10, $container->getParameter('paysera_lock.ttl'));
+        return [
+            'defaults to five seconds' => [['redis_client' => 'app.redis'], 5],
+            'read as an integer' => [['ttl' => '10', 'redis_client' => 'app.redis'], 10],
+        ];
     }
 
-    public function testTheStoreIsARedisStoreOnTheConfiguredClient(): void
+    /**
+     * @dataProvider serviceDefinitionDataProvider
+     *
+     * @param array{class: string, arguments: array<int, mixed>} $expectedDefinition
+     */
+    public function testServiceDefinition(string $serviceId, array $expectedDefinition): void
     {
-        $store = $this->load(['redis_client' => 'app.redis'])->getDefinition('paysera_lock.lock_store');
+        $definition = $this->load(['redis_client' => 'app.redis'])->getDefinition($serviceId);
 
-        $this->assertSame(RedisStore::class, $store->getClass());
-        $this->assertCount(1, $store->getArguments());
-        $this->assertReferenceTo('app.redis', $store->getArgument(0));
+        $this->assertSame($expectedDefinition, [
+            'class' => $definition->getClass(),
+            'arguments' => array_map(function ($argument) {
+                return $argument instanceof Reference ? ['service' => (string) $argument] : $argument;
+            }, $definition->getArguments()),
+        ]);
     }
 
-    public function testTheFactoryUsesTheStore(): void
+    /**
+     * @return array<string, array{string, array{class: string, arguments: array<int, mixed>}}>
+     */
+    public static function serviceDefinitionDataProvider(): array
     {
-        $factory = $this->load(['redis_client' => 'app.redis'])->getDefinition('paysera_lock.lock_factory');
-
-        $this->assertSame(LockFactory::class, $factory->getClass());
-        $this->assertCount(1, $factory->getArguments());
-        $this->assertReferenceTo('paysera_lock.lock_store', $factory->getArgument(0));
-    }
-
-    public function testTheLockManagerUsesTheFactoryAndTheTtl(): void
-    {
-        $lockManager = $this->load(['redis_client' => 'app.redis'])->getDefinition('paysera_lock.lock_manager');
-
-        $this->assertSame(LockManager::class, $lockManager->getClass());
-        $this->assertCount(2, $lockManager->getArguments());
-        $this->assertReferenceTo('paysera_lock.lock_factory', $lockManager->getArgument(0));
-        $this->assertSame('%paysera_lock.ttl%', $lockManager->getArgument(1));
+        return [
+            'the store is a RedisStore on the configured client' => [
+                'paysera_lock.lock_store',
+                ['class' => RedisStore::class, 'arguments' => [['service' => 'app.redis']]],
+            ],
+            'the factory uses the store' => [
+                'paysera_lock.lock_factory',
+                ['class' => LockFactory::class, 'arguments' => [['service' => 'paysera_lock.lock_store']]],
+            ],
+            'the lock manager uses the factory and the ttl' => [
+                'paysera_lock.lock_manager',
+                [
+                    'class' => LockManager::class,
+                    'arguments' => [['service' => 'paysera_lock.lock_factory'], '%paysera_lock.ttl%'],
+                ],
+            ],
+        ];
     }
 
     /**
@@ -87,15 +107,6 @@ class PayseraLockExtensionTest extends TestCase
             'missing' => [['ttl' => 5]],
             'empty' => [['redis_client' => '']],
         ];
-    }
-
-    /**
-     * @param mixed $argument
-     */
-    private function assertReferenceTo(string $serviceId, $argument): void
-    {
-        $this->assertInstanceOf(Reference::class, $argument, 'a service reference, not the id as a string');
-        $this->assertSame($serviceId, (string) $argument);
     }
 
     /**

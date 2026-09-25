@@ -28,8 +28,7 @@ class LockManager
     }
 
     /**
-     * @throws LockAcquiringException when the lock is still held after the last attempt (ttl attempts one second apart,
-     *                                at least one), or at once when the store fails
+     * @throws LockAcquiringException
      */
     public function acquire(LockInterface $lock): bool
     {
@@ -45,13 +44,11 @@ class LockManager
             sleep(1);
         }
 
-        // Unreachable: an exhausted loop has already thrown above.
         throw new LockAcquiringException('Failed to acquire lock'); // @codeCoverageIgnore
     }
 
     /**
-     * @throws LockAcquiringException when the lock is still held after the last attempt (ttl attempts one second apart,
-     *                                at least one), or at once when the store fails
+     * @throws LockAcquiringException
      */
     public function createAcquired(string $resource): LockInterface
     {
@@ -62,7 +59,7 @@ class LockManager
     }
 
     /**
-     * @throws LockReleasingException when the store fails to release the lock
+     * @throws LockReleasingException
      */
     public function release(LockInterface $lock): void
     {
