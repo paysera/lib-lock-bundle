@@ -15,7 +15,6 @@ use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Lock\LockInterface;
 use Symfony\Component\Lock\PersistingStoreInterface;
 use Symfony\Component\Lock\Store\FlockStore;
-use Symfony\Component\Lock\StoreInterface;
 
 class LockManagerTest extends TestCase
 {
@@ -43,8 +42,7 @@ class LockManagerTest extends TestCase
 
     public function testCreateLockReturnsALockOnTheResourceThatIsNotAcquiredAndHasNoTtl(): void
     {
-        $storeInterface = interface_exists(StoreInterface::class) ? StoreInterface::class : PersistingStoreInterface::class;
-        $store = $this->createMock($storeInterface);
+        $store = $this->createMock(PersistingStoreInterface::class);
         $store->expects($this->once())
             ->method('save')
             ->with($this->callback(function (Key $key): bool {
