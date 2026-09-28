@@ -30,6 +30,7 @@ jobs:
           - '8.3'
           - '8.4'
         dependency:
+          - 'lowest'
           - 'highest'
 
     name: PHP ${{ matrix.php }} with ${{ matrix.dependency }} dependencies tests on ${{ matrix.operating-system }}
