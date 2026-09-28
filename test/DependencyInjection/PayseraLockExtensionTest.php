@@ -11,6 +11,7 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\HttpKernel\DependencyInjection\Extension as HttpKernelExtension;
 use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Lock\Store\RedisStore;
 
@@ -22,6 +23,7 @@ class PayseraLockExtensionTest extends TestCase
 
         $this->assertInstanceOf(PayseraLockExtension::class, $extension);
         $this->assertSame('paysera_lock', $extension->getAlias());
+        $this->assertNotInstanceOf(HttpKernelExtension::class, $extension);
     }
 
     /**
