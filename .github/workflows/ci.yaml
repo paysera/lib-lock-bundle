@@ -44,6 +44,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
 
+      - name: Allow packages with security advisories for the lowest dependencies
+        if: matrix.dependency == 'lowest' && matrix.php != '7.1'
+        run: composer config --global policy.advisories.block false
+
       - name: Install dependencies
         uses: ramsey/composer-install@v2
         with:
