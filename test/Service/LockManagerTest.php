@@ -8,6 +8,7 @@ use Exception;
 use Paysera\Bundle\LockBundle\Service\LockManager;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Lock\Exception\LockAcquiringException;
 use Symfony\Component\Lock\Key;
 use Symfony\Component\Lock\LockFactory;
@@ -23,9 +24,21 @@ class LockManagerTest extends TestCase
      */
     public static $sleeps = [];
 
+    /**
+     * @var string
+     */
+    private $lockDirectory;
+
     protected function setUp(): void
     {
         self::$sleeps = [];
+        $this->lockDirectory = sys_get_temp_dir() . '/' . uniqid('lock-manager-test-', true);
+        mkdir($this->lockDirectory);
+    }
+
+    protected function tearDown(): void
+    {
+        (new Filesystem())->remove($this->lockDirectory);
     }
 
     public function testCreateLockReturnsALockOnTheResourceThatIsNotAcquiredAndHasNoTtl(): void
@@ -134,10 +147,10 @@ class LockManagerTest extends TestCase
 
     public function testCreateAcquiredHoldsTheLockUntilItIsReleased(): void
     {
-        $factory = new LockFactory(new FlockStore());
+        $factory = new LockFactory(new FlockStore($this->lockDirectory));
         $lockManager = new LockManager($factory, 5);
         $noWait = new LockManager($factory, 1);
-        $resource = uniqid('lock-manager-test-', true);
+        $resource = 'invoice-42';
 
         $lock = $lockManager->createAcquired($resource);
         $this->assertTrue($lock->isAcquired());
