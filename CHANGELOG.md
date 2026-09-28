@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## 2.2.0
 ### Added
 - Support for Symfony 7.4
+### Changed
+- The services are defined in `PayseraLockExtension` instead of `Resources/config/services.xml`, which is removed. Symfony 7.4 no longer reports that the XML configuration format is deprecated
+- `PayseraLockExtension` extends `Symfony\Component\DependencyInjection\Extension\Extension` instead of `Symfony\Component\HttpKernel\DependencyInjection\Extension`, which is internal since Symfony 7.1. Breaking for subclasses that call the class-cache methods of the HttpKernel class (`addAnnotatedClassesToCompile()`, deprecated since Symfony 7.1, and its getter): register those classes from an extension that extends the HttpKernel class
 ### Removed
 - Support for `symfony/lock` 3.4: the bundle uses `LockFactory`, which 3.4 does not have
 

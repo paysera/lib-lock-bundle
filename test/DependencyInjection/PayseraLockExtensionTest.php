@@ -109,6 +109,24 @@ class PayseraLockExtensionTest extends TestCase
         ];
     }
 
+    public function testLoadingTriggersNoDeprecation(): void
+    {
+        $deprecations = [];
+        set_error_handler(function (int $level, string $message) use (&$deprecations): bool {
+            $deprecations[] = $message;
+
+            return true;
+        }, E_USER_DEPRECATED);
+
+        try {
+            $this->load(['redis_client' => 'app.redis']);
+        } finally {
+            restore_error_handler();
+        }
+
+        $this->assertSame([], $deprecations);
+    }
+
     /**
      * @param array<string, mixed> $config
      */
