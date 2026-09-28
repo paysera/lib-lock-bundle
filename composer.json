@@ -11,10 +11,7 @@
     "autoload-dev": {
         "psr-4": {
             "Paysera\\Bundle\\LockBundle\\Test\\": "test"
-        },
-        "files": [
-            "test/Service/sleep.php"
-        ]
+        }
     },
     "require": {
         "php": ">=7.1",
