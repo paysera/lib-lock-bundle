@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Paysera\Bundle\LockBundle\Service;
 
 use Symfony\Component\Lock\Exception\LockAcquiringException;
+use Symfony\Component\Lock\Exception\LockReleasingException;
 use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Lock\LockInterface;
 
@@ -26,6 +27,9 @@ class LockManager
         return $this->lockFactory->createLock($resource, null);
     }
 
+    /**
+     * @throws LockAcquiringException
+     */
     public function acquire(LockInterface $lock): bool
     {
         foreach (range(1, $this->ttl) as $waited) {
@@ -40,9 +44,12 @@ class LockManager
             sleep(1);
         }
 
-        throw new LockAcquiringException('Failed to acquire lock');
+        throw new LockAcquiringException('Failed to acquire lock'); // @codeCoverageIgnore
     }
 
+    /**
+     * @throws LockAcquiringException
+     */
     public function createAcquired(string $resource): LockInterface
     {
         $lock = $this->createLock($resource);
@@ -51,6 +58,9 @@ class LockManager
         return $lock;
     }
 
+    /**
+     * @throws LockReleasingException
+     */
     public function release(LockInterface $lock): void
     {
         $lock->release();

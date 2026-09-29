@@ -1,13 +1,11 @@
 framework:
     secret: test
 
-snc_redis:
-    clients:
-        default:
-            type: predis
-            alias: default
-            dsn: redis://localhost
+services:
+    redis_client:
+        class: Predis\Client
+        arguments: ['redis://localhost']
 
 paysera_lock:
     ttl: 10
-    redis_client: 'snc_redis.default'
+    redis_client: 'redis_client'
