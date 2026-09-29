@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 2.2.1
+### Changed
+- `symfony/yaml` moved from `require` to `require-dev`: only the test configuration is YAML
+### Removed
+- `symfony/console` from `require`: the bundle never used it
+
 ## 2.2.0
 ### Added
 - Support for Symfony 7.4
